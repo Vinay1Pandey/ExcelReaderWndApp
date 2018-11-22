@@ -16,93 +16,11 @@ namespace ReadExcelFileApp
             try
             {
                 double NetAmtOS = 0;
-                List<object> lstLastPaymentDate = new List<object>();
-                lstLastPaymentDate = (from DataRow dr in dt1.Rows
-                                      select (dr["F18"])).ToList();
-                lstLastPaymentDate.Remove("Last Payment Date");
-                var stringList = lstLastPaymentDate.OfType<string>();
-
                 List<object> lstCustID = new List<object>();
                 lstCustID = (from DataRow dr in dt1.Rows
                              select (dr["F2"])).ToList();
                 lstCustID.Remove("Customer Id");
                 var stringList1 = lstCustID.OfType<string>();
-
-                List<object> lstEmailID = new List<object>();
-                lstEmailID = (from DataRow dr in dt1.Rows
-                              select (dr["F19"])).ToList();
-                lstEmailID.Remove("Contact e-mail");
-                var stringListEmailID = lstEmailID.OfType<string>();
-
-
-                List<object> lstBill = new List<object>();
-                lstBill = (from DataRow dr in dt2.Rows
-                           select (dr["Bill Amount (₹)"])).ToList();
-                var intListBill = lstBill.OfType<double>().ToList();
-
-
-                List<object> lstDeposits = new List<object>();
-                lstDeposits = (from DataRow dr in dt1.Rows
-                               select (dr["F15"])).ToList();
-                lstDeposits.Remove("Security Deposit Amount (₹)");
-                var stringListDeposits = lstDeposits.OfType<string>().ToList();
-
-
-                List<object> lstCRLimits = new List<object>();
-                lstCRLimits = (from DataRow dr in dt1.Rows
-                               select (dr["F16"])).ToList();
-                lstCRLimits.Remove("Credit Limit (₹)");
-                var stringListCRLimits = lstCRLimits.OfType<string>().ToList();
-
-                List<object> lstConnectionType = new List<object>();
-                lstConnectionType = (from DataRow dr in dt1.Rows
-                                     select (dr["F11"])).ToList();
-                lstConnectionType.Remove("Connection Type");
-                var stringListConnectionType = lstConnectionType.OfType<string>().ToList();
-
-                List<string> lstCostumerCategory = new List<string>();
-                for (int i = 0; i < dt1.Rows.Count; i++)
-                {
-                    lstCostumerCategory.Add(dt1.Rows[i]["F10"].ToString());
-                }
-                //lstCostumerCategory = (from DataRow dr in dt1.Rows
-                //                   select (string)dr[18]).ToList();
-                lstCostumerCategory.Remove("Customer Category ");
-                //var stringListCostumerCategory = lstCostumerCategory.OfType<string>().ToList();
-
-                List<string> lstDefaults = new List<string>();
-                for (int i = 0; i < dt1.Rows.Count; i++)
-                {
-                    lstDefaults.Add(dt1.Rows[i]["F17"].ToString());
-                }
-                lstDefaults.Remove("Defaults / Year");
-
-                List<string> lstCustomerType = new List<string>();
-                for (int i = 0; i < dt1.Rows.Count; i++)
-                {
-                    lstCustomerType.Add(dt1.Rows[i]["F4"].ToString());
-                }
-                lstCustomerType.Remove("Customer Type");
-
-                List<string> lstAVGR = new List<string>();
-                for (int i = 0; i < dt1.Rows.Count; i++)
-                {
-                    lstAVGR.Add(dt1.Rows[i]["F8"].ToString());
-                }
-                lstAVGR.Remove("Avg Revenue Score (AVGR)");
-                List<string> lstLOYT = new List<string>();
-                for (int i = 0; i < dt1.Rows.Count; i++)
-                {
-                    lstLOYT.Add(dt1.Rows[i]["F7"].ToString());
-                }
-                lstLOYT.Remove("Loyalty Score (LOYT)");
-
-                List<string> lstDisputes = new List<string>();
-                for (int i = 0; i < dt3.Rows.Count; i++)
-                {
-                    lstDisputes.Add(dt3.Rows[i]["Status"].ToString());
-                }
-                lstDisputes.Remove("Status");
 
                 List<string> lstDisputesCust = new List<string>();
                 for (int i = 0; i < dt3.Rows.Count; i++)
@@ -110,6 +28,9 @@ namespace ReadExcelFileApp
                     lstDisputesCust.Add(dt3.Rows[i]["Customer Id"].ToString());
                 }
                 lstDisputesCust.Remove("Customer Id");
+
+                var lstNoDisputeCustID = stringList1.Except(lstDisputesCust).ToList();
+
                 List<string> lstDisputeEmail = new List<string>();
                 foreach (var item in lstDisputesCust)
                 {
@@ -117,12 +38,177 @@ namespace ReadExcelFileApp
                     lstDisputeEmail.Add(dt.Rows[0][0].ToString());
                 }
                 List<string> lstNoDisputeEmails = new List<string>();
-                var lst = stringList1.Except(lstDisputesCust).ToList();
-                foreach (var item in lst)
+
+                foreach (var item in lstNoDisputeCustID)
                 {
                     var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F19");
                     lstNoDisputeEmails.Add(dt.Rows[0][0].ToString());
                 }
+                List<string> lstMobiles = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F14");
+                    lstMobiles.Add(dt.Rows[0][0].ToString());
+                }
+                lstMobiles.Remove("Mobile");
+
+                List<string> lstBB = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F13");
+                    lstBB.Add(dt.Rows[0][0].ToString());
+                }
+                lstBB.Remove("BB");
+
+                List<string> lstFixedLine = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, dt1.Columns[11].ColumnName);
+                    lstFixedLine.Add(dt.Rows[0][0].ToString());
+                }
+                lstFixedLine.Remove("Fixed Line");
+
+                List<string> lstLastPaymentDate = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F18");
+                    lstLastPaymentDate.Add(dt.Rows[0][0].ToString());
+                }
+                lstLastPaymentDate.Remove("Last Payment Date");
+                var stringList = lstLastPaymentDate;
+
+                List<string> lstCustName = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F3");
+                    lstCustName.Add(dt.Rows[0][0].ToString());
+                }
+                lstCustName.Remove("Customer Name");
+                var stringListCustName = lstCustName;
+
+                List<string> lstBillDate = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt2.Select("[Customer Id] = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "Bill Date");
+                    lstBillDate.Add(dt.Rows[0][0].ToString());
+                }
+                lstBillDate.Remove("Bill Date");
+                var stringListBillDate = lstBillDate;
+
+                List<string> lstEmailID = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F19");
+                    lstEmailID.Add(dt.Rows[0][0].ToString());
+                }
+                lstEmailID.Remove("Contact e-mail");
+                var stringListEmailID = lstEmailID;
+
+                List<string> lstBill = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt2.Select("[Customer Id]='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "Bill Amount (₹)");
+                    lstBill.Add(dt.Rows[0][0].ToString());
+                }
+                //var intListBill = lstBill.OfType<double>().ToList();
+
+                List<string> lstDeposits = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F15");
+                    lstDeposits.Add(dt.Rows[0][0].ToString());
+                }
+                lstDeposits.Remove("Security Deposit Amount (₹)");
+                var stringListDeposits = lstDeposits;
+
+                List<string> lstCRLimits = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F16");
+                    lstCRLimits.Add(dt.Rows[0][0].ToString());
+                }
+                lstCRLimits.Remove("Credit Limit (₹)");
+                var stringListCRLimits = lstCRLimits;
+
+                List<string> lstConnectionType = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F11");
+                    lstConnectionType.Add(dt.Rows[0][0].ToString());
+                }
+                lstConnectionType.Remove("Connection Type");
+                var stringListConnectionType = lstConnectionType;
+
+                 List<string> lstCostumerCategory = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F10");
+                    lstCostumerCategory.Add(dt.Rows[0][0].ToString());
+                }
+                lstCostumerCategory.Remove("Connection Type");
+
+
+                List<string> lstDefaults = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F17");
+                    lstDefaults.Add(dt.Rows[0][0].ToString());
+                }
+                lstDefaults.Remove("Defaults / Year");
+
+                List<string> lstCustomerType = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F4");
+                    lstCustomerType.Add(dt.Rows[0][0].ToString());
+                }
+                lstCustomerType.Remove("Customer Type");
+
+                List<string> lstAVGR = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F8");
+                    lstAVGR.Add(dt.Rows[0][0].ToString());
+                }
+                lstAVGR.Remove("Avg Revenue Score (AVGR)");
+
+                List<string> lstLOYT = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt1.Select("F2='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F7");
+                    lstLOYT.Add(dt.Rows[0][0].ToString());
+                }
+                lstLOYT.Remove("Loyalty Score (LOYT)");
+
+                List<string> lstGadgets = new List<string>();
+                for (int i = 0; i < lstBB.Count(); i++)
+                {
+                    if(lstBB[i]=="Yes")
+                    {
+                        lstGadgets.Add("BroadBand");
+                    }
+                    else if(lstMobiles[i]=="Yes")
+                    {
+                        lstGadgets.Add("Mobiles");
+                    }
+                    else if(lstFixedLine[i]=="Yes")
+                    {
+                        lstGadgets.Add("FixedLine");
+                    }
+                }
+                List<string> lstReminder = new List<string>();
+                foreach (var item in lstNoDisputeCustID)
+                {
+                    var dt = dt2.Select("[Customer Id]='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "No# of reminders sent");
+                    lstReminder.Add(dt.Rows[0][0].ToString());
+                }
+                
+                //SendEmail.Email(3, lstNoDisputeEmails, stringList.ToList(), lstBill, lstReminder, stringList.ToList());
+
+                //lstReminder.Remove("No# of reminders sent");
+
+                //lstGadgets.Remove("");
+
 
                 foreach (var item in stringList)
                 {
@@ -142,16 +228,16 @@ namespace ReadExcelFileApp
                         }
                         else if (date > 30 && date < 60)
                         {
-                            for (int i = 0; i < intListBill.Count; i++)
+                            for (int i = 0; i < lstBill.Count; i++)
                             {
                                 //if(!intListCRLimits.Contains("Credit Limit(₹)"))
                                 //{
-                                NetAmtOS = intListBill[i] - Convert.ToDouble(stringListDeposits[i]) - Convert.ToDouble(stringListCRLimits[i]);
+                                NetAmtOS = Convert.ToDouble(lstBill[i]) - Convert.ToDouble(stringListDeposits[i]) - Convert.ToDouble(stringListCRLimits[i]);
                                 NetAmtOS = 999;
                                 //}
                                 if (NetAmtOS <= 0)
                                 {
-                                    //SendEmail.Email(0,stringListEmailID.ToList());
+                                   //EM0
                                 }
                                 else if (0 < NetAmtOS && NetAmtOS < 1000)
                                 {
@@ -172,17 +258,17 @@ namespace ReadExcelFileApp
                                                         {
                                                             //dispute
 
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i],lstReminder[i], stringList.ToList()[i], lstCustName[i]);
 
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -191,16 +277,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -209,16 +295,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }
@@ -232,16 +318,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -250,21 +336,21 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
                                                     {
-                                                        //SendEmail.Email(0,stringListEmailID.ToList());
+                                                        //SendEmail.Email(0, stringListEmailID.ToList());
                                                     }
                                                 }
                                             }
@@ -280,16 +366,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -298,27 +384,27 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                 }
                                                 else if (lstCustomerType[i].ToUpper().Equals("BUSINESS") ||
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
-                                                    //SendEmail.Email(0,lstDisputeEmail);
+                                                    //SendEmail.Email(0, lstDisputeEmail);
                                                 }
                                             }
                                         }
@@ -336,16 +422,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -354,16 +440,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -372,16 +458,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }
@@ -395,16 +481,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -413,21 +499,21 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                 }
                                             }
@@ -443,31 +529,31 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                 }
                                                 else if (lstCustomerType[i].ToUpper().Equals("BUSINESS") ||
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
-                                                    //SendEmail.Email(0,lstDisputeEmail);
+                                                    //SendEmail.Email(0, lstDisputeEmail);
                                                 }
                                             }
                                         }
@@ -485,16 +571,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -503,16 +589,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -521,16 +607,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }
@@ -544,25 +630,25 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                 }
                                             }
@@ -578,31 +664,31 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(0,lstNoDisputeEmails);
+                                                            //SendEmail.Email(0, lstNoDisputeEmails);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
                                                     {
-                                                        //SendEmail.Email(0,lstDisputeEmail);
+                                                        //SendEmail.Email(0, lstDisputeEmail);
                                                     }
                                                 }
                                                 else if (lstCustomerType[i].ToUpper().Equals("BUSINESS") ||
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
-                                                    //SendEmail.Email(0,lstDisputeEmail);
+                                                    //SendEmail.Email(0, lstDisputeEmail);
                                                 }
                                             }
                                         }
@@ -620,16 +706,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(5,lstNoDisputeEmails);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(6,lstNoDisputeEmails);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -638,16 +724,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -656,16 +742,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }
@@ -679,16 +765,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(5,lstNoDisputeEmails);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(6,lstNoDisputeEmails);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -697,16 +783,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -715,16 +801,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                           // SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }
@@ -741,16 +827,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                           // SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(5,lstNoDisputeEmails);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(6,lstNoDisputeEmails);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -759,16 +845,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                           // SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -777,16 +863,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }
@@ -800,16 +886,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(5,lstNoDisputeEmails);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(6,lstNoDisputeEmails);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
@@ -818,16 +904,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(3,lstNoDisputeEmails);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(4,lstNoDisputeEmails);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -836,16 +922,16 @@ namespace ReadExcelFileApp
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(1,lstNoDisputeEmails);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
-                                                            //SendEmail.Email(0,lstDisputeEmail);
+                                                            //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            //SendEmail.Email(2,lstNoDisputeEmails);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
                                                         }
                                                     }
                                                 }

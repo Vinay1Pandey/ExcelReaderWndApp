@@ -47,7 +47,7 @@ namespace ReadExcelFileApp
                         dtExcel2 = ReadExcel.ConvertExcelToDataTableRevenue(filePath);
                         dtExcel3 = ReadExcel.ConvertExcelToDataTableDisputes(filePath);
                         dataGridView1.Visible = true;
-                        dataGridView1.DataSource = dtExcel3;
+                        dataGridView1.DataSource = dtExcel1;
                         ProcessData.processData(dtExcel1, dtExcel2, dtExcel3);
                     }
                     catch (Exception ex)
