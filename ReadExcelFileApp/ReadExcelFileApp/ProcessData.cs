@@ -11,7 +11,7 @@ namespace ReadExcelFileApp
 {
     public class ProcessData
     {
-        public static void processData(DataTable dt1, DataTable dt2, DataTable dt3)
+        public static void processData(DataTable dt1, DataTable dt2, DataTable dt3,string filepath)
         {
             try
             {
@@ -30,13 +30,6 @@ namespace ReadExcelFileApp
                 lstDisputesCust.Remove("Customer Id");
 
                 var lstNoDisputeCustID = stringList1.Except(lstDisputesCust).ToList();
-
-                List<string> lstDisputeEmail = new List<string>();
-                foreach (var item in lstDisputesCust)
-                {
-                    var dt = dt1.Select("F2 = '" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "F19");
-                    lstDisputeEmail.Add(dt.Rows[0][0].ToString());
-                }
                 List<string> lstNoDisputeEmails = new List<string>();
 
                 foreach (var item in lstNoDisputeCustID)
@@ -202,7 +195,7 @@ namespace ReadExcelFileApp
                     var dt = dt2.Select("[Customer Id]='" + item + "'").CopyToDataTable().DefaultView.ToTable(true, "No# of reminders sent");
                     lstReminder.Add(dt.Rows[0][0].ToString());
                 }
-                
+                double date = 0;
                 //SendEmail.Email(3, lstNoDisputeEmails, stringList.ToList(), lstBill, lstReminder, stringList.ToList());
 
                 //lstReminder.Remove("No# of reminders sent");
@@ -210,48 +203,51 @@ namespace ReadExcelFileApp
                 //lstGadgets.Remove("");
 
 
-                foreach (var item in stringList)
-                {
-
-                    if (item != "")
+                //foreach (var item in stringList)
+                for (int i = 0; i < stringList.Count; i++)
                     {
-                        string dtS = DateTime.ParseExact(item, "dd/MM/yy", CultureInfo.InvariantCulture).ToShortDateString();
+
+                    if (stringList[i] != "")
+                    {
+                        string dtS = DateTime.ParseExact(stringList[i], "dd/MM/yy", CultureInfo.InvariantCulture).ToShortDateString();
                         //string dtS = string.Format("{0:MM/dd/yy}", Convert.ToDateTime(item).ToShortDateString());
                         string dtNow = string.Format("{0:MM/dd/yyyy}", DateTime.Now);
-                        double date = 0;
+                        
                         date = (Convert.ToDateTime(dtNow) - Convert.ToDateTime(dtS)).TotalDays;
-                        date = 31;
-                        if (date < 30)
+                        //date = 31;
+                        if (date <= 30)
                         {
                             //EM=0;
                             //SendEmail.Email(0,stringListEmailID.ToList());
+                           // WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Out standing days are less than 30");
                         }
-                        else if (date > 30 && date < 60)
+                        else if (date > 30 && date <= 60)
                         {
-                            for (int i = 0; i < lstBill.Count; i++)
-                            {
+                            //for (int i = 0; i < lstBill.Count; i++)
+                            //{
                                 //if(!intListCRLimits.Contains("Credit Limit(₹)"))
                                 //{
                                 NetAmtOS = Convert.ToDouble(lstBill[i]) - Convert.ToDouble(stringListDeposits[i]) - Convert.ToDouble(stringListCRLimits[i]);
-                                NetAmtOS = 999;
+                                //NetAmtOS = 999;
                                 //}
                                 if (NetAmtOS <= 0)
                                 {
-                                   //EM0
-                                }
-                                else if (0 < NetAmtOS && NetAmtOS < 1000)
+                                //EM0
+                               // WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Net Amount is less than or equal to 0");
+                            }
+                                else if (0 < NetAmtOS && NetAmtOS <= 1000)
                                 {
                                     if (stringListConnectionType[i] == "Private")
                                     {
-                                        if (lstCostumerCategory[i + 1] == "CIP")
+                                        if (lstCostumerCategory[i] == "CIP")
                                         {
-                                            if (Convert.ToInt32(lstDefaults[i + 1]) > 0)
+                                            if (Convert.ToInt32(lstDefaults[i]) > 0)
                                             {
                                                 //cust
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -260,18 +256,20 @@ namespace ReadExcelFileApp
 
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i],lstReminder[i], stringList.ToList()[i], lstCustName[i]);
-
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i],lstReminder[i], stringList.ToList()[i], lstCustName[i],lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -279,14 +277,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -297,14 +299,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -312,7 +318,7 @@ namespace ReadExcelFileApp
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -320,17 +326,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -338,14 +348,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -360,7 +374,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -368,17 +382,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -386,14 +404,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -416,7 +438,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -424,17 +446,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -442,14 +468,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -460,14 +490,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -475,7 +509,7 @@ namespace ReadExcelFileApp
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -483,17 +517,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -501,14 +539,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -523,7 +565,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -531,17 +573,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //SendEmail.Email(0, lstDisputeEmail);
                                                     }
@@ -565,7 +611,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -573,17 +619,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -591,14 +641,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -609,14 +663,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -624,7 +682,7 @@ namespace ReadExcelFileApp
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -632,17 +690,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //SendEmail.Email(0, lstDisputeEmail);
                                                     }
@@ -658,7 +720,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -673,10 +735,12 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //SendEmail.Email(0, lstDisputeEmail);
                                                     }
@@ -700,7 +764,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -708,17 +772,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -726,14 +794,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -744,14 +816,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -759,7 +835,7 @@ namespace ReadExcelFileApp
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -767,17 +843,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -785,14 +865,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -803,14 +887,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                            // SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -821,7 +909,7 @@ namespace ReadExcelFileApp
                                                 if (lstCustomerType[i].ToUpper().Equals("INDIVIDUAL"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -829,17 +917,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                            // SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -847,14 +939,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                            // SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -865,14 +961,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -880,7 +980,7 @@ namespace ReadExcelFileApp
                                                     lstCustomerType[i].ToUpper().Equals("SERVICE") || lstCustomerType[i].ToUpper().Equals("EMER"))
                                                 {
                                                     //avgr
-                                                    if (Convert.ToInt32(lstAVGR[i]) < 3)
+                                                    if (Convert.ToInt32(lstAVGR[i]) <= 3)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -888,17 +988,21 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(5, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(6, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
-                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) < 6)
+                                                    else if (3 < Convert.ToInt32(lstAVGR[i]) && Convert.ToInt32(lstAVGR[i]) <= 6)
                                                     {
                                                         //loyt
                                                         if (Convert.ToInt32(lstLOYT[i]) > 1)
@@ -906,14 +1010,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(3, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(4, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                     else if (Convert.ToInt32(lstAVGR[i]) > 6)
@@ -924,14 +1032,18 @@ namespace ReadExcelFileApp
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(1, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                         else if (Convert.ToInt32(lstLOYT[i]) == 1)
                                                         {
                                                             //dispute
                                                             //SendEmail.Email(0, lstDisputeEmail);
 
-                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i]);
+                                                            SendEmail.Email(2, lstNoDisputeEmails[i], stringList.ToList()[i], lstBill[i], lstReminder[i], stringList.ToList()[i], lstCustName[i], lstGadgets[i]);
+                                                            WriteReminderExcel.UpdateReminder(lstNoDisputeCustID[i], filepath, lstReminder[i]);WriteReminderExcel.UpDateStatus(lstNoDisputeCustID[i], filepath, "Reminder Sent");
+
                                                         }
                                                     }
                                                 }
@@ -955,27 +1067,27 @@ namespace ReadExcelFileApp
                                     }
 
                                 }
-                                else if (1000 < NetAmtOS && NetAmtOS < 3000)
+                                else if (1000 < NetAmtOS && NetAmtOS <= 3000)
                                 {
 
                                 }
-                                else if (3000 < NetAmtOS && NetAmtOS < 10000)
+                                else if (3000 < NetAmtOS && NetAmtOS <= 10000)
                                 {
 
                                 }
-                                else if (10000 < NetAmtOS && NetAmtOS < 25000)
+                                else if (10000 < NetAmtOS && NetAmtOS <= 25000)
                                 {
 
                                 }
-                                else if (25000 < NetAmtOS && NetAmtOS < 50000)
+                                else if (25000 < NetAmtOS && NetAmtOS <= 50000)
                                 {
 
                                 }
-                                else if (50000 < NetAmtOS && NetAmtOS < 100000)
+                                else if (50000 < NetAmtOS && NetAmtOS <= 100000)
                                 {
 
                                 }
-                                else if (100000 < NetAmtOS && NetAmtOS < 500000)
+                                else if (100000 < NetAmtOS && NetAmtOS <= 500000)
                                 {
 
                                 }
@@ -986,7 +1098,7 @@ namespace ReadExcelFileApp
 
                             }
                         }
-                        else if (60 < date && date < 90)
+                        else if (60 < date && date <= 90)
                         {
 
                         }
@@ -995,15 +1107,15 @@ namespace ReadExcelFileApp
 
                         }
                     }
-
-                }
+                MessageBox.Show("Process Complete!");
+                //}
 
 
             }
             catch (Exception ex)
             {
 
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(ex.ToString());
             }
 
         }

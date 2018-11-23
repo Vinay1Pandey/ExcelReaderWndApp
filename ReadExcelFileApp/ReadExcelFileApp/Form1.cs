@@ -17,6 +17,8 @@ namespace ReadExcelFileApp
 {
     public partial class Form1 : Form
     {
+        string filePath = string.Empty;
+        string fileExt = string.Empty;
         public Form1()
         {
             InitializeComponent();
@@ -24,13 +26,12 @@ namespace ReadExcelFileApp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            dataGridView1.Visible = false;
+            //dataGridView1.Visible = false;
         }
 
         private void btnChoose_Click(object sender, EventArgs e)
         {
-            string filePath = string.Empty;
-            string fileExt = string.Empty;
+            
             OpenFileDialog file = new OpenFileDialog();//open dialog to choose file
             if (file.ShowDialog() == DialogResult.OK)//if there is a file choosen by the user
             {
@@ -40,15 +41,9 @@ namespace ReadExcelFileApp
                 {
                     try
                     {
-                        DataTable dtExcel1 = new DataTable();
-                        DataTable dtExcel2 = new DataTable();
-                        DataTable dtExcel3 = new DataTable();                     
-                        dtExcel1 = ReadExcel.ConvertExcelToDataTableBaseData(filePath);
-                        dtExcel2 = ReadExcel.ConvertExcelToDataTableRevenue(filePath);
-                        dtExcel3 = ReadExcel.ConvertExcelToDataTableDisputes(filePath);
-                        dataGridView1.Visible = true;
-                        dataGridView1.DataSource = dtExcel1;
-                        ProcessData.processData(dtExcel1, dtExcel2, dtExcel3);
+                        txtFilePath.Text = filePath;
+                        //dataGridView1.Visible = true;
+                        //dataGridView1.DataSource = dtExcel1;
                     }
                     catch (Exception ex)
                     {
@@ -61,9 +56,33 @@ namespace ReadExcelFileApp
                 }
             }
         }
-        private void btnClose_Click(object sender, EventArgs e)
+
+        private void btnSubmit_Click(object sender, EventArgs e)
         {
-            Close();//to close the window(Form1)
-        }       
+            try
+            {
+               
+                Form1 frm1 = new Form1();
+                frm1.Visible = false;
+                Form2 frm = new Form2();
+                frm.Show();
+                  
+                        DataTable dtExcel1 = new DataTable();
+                        DataTable dtExcel2 = new DataTable();
+                        DataTable dtExcel3 = new DataTable();
+                        txtFilePath.Text = filePath;
+                        dtExcel1 = ReadExcel.ConvertExcelToDataTableBaseData(filePath);
+                        dtExcel2 = ReadExcel.ConvertExcelToDataTableRevenue(filePath);
+                        dtExcel3 = ReadExcel.ConvertExcelToDataTableDisputes(filePath);
+                        ProcessData.processData(dtExcel1, dtExcel2, dtExcel3, filePath);
+                        frm.Close();
+                frm1.Show();
+            }
+            catch (Exception ex)
+            {
+
+                MessageBox.Show(ex.Message);
+            }
+        }
     }
 }

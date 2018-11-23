@@ -10,7 +10,7 @@ namespace ReadExcelFileApp
 {
     public class SendEmail
     {
-        public static void Email(int i, string EmailID,string LastPayDate, string ListBill,string Reminder,string DueDate,string CustName)
+        public static void Email(int i, string EmailID,string LastPayDate, string ListBill,string Reminder,string DueDate,string CustName,string Gadgets)
         {
             try
             {
@@ -41,13 +41,7 @@ namespace ReadExcelFileApp
                                         " <p><b> Regards,</b></p>" +
                                         " <p>BSNL Team</p>"+
                                         " </div>" +
-                                        " <p><h6> This email is system generated, please do not respond to this email.</h6></p> ";
-                            SmtpServer.Port = 587;
-                            SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
-                            SmtpServer.EnableSsl = true;
-                            SmtpServer.Send(mail);
-                            mail.To.Clear();
-                        
+                                        " <p><h6> This email is system generated, please do not respond to this email.</h6></p> ";                        
                         break;
                     case 2:
                         
@@ -65,11 +59,6 @@ namespace ReadExcelFileApp
                                         " <p>BSNL Team</p>"+
                                         " </div>" +
                                         " <p><h6> This email is system generated, please do not respond to this email.</h6></p> ";
-                            SmtpServer.Port = 587;
-                            SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
-                            SmtpServer.EnableSsl = true;
-                            SmtpServer.Send(mail);
-                            mail.To.Clear();
                         
                         break;
                     case 3:
@@ -87,11 +76,6 @@ namespace ReadExcelFileApp
                                         " <p>BSNL Team</p>"+
                                         " </div>" +
                                         " <p><h6> This email is system generated, please do not respond to this email.</h6 ></p> ";
-                            SmtpServer.Port = 587;
-                            SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
-                            SmtpServer.EnableSsl = true;
-                            SmtpServer.Send(mail);
-                            mail.To.Clear();
                         
                         break;
                     case 4:
@@ -111,11 +95,6 @@ namespace ReadExcelFileApp
                                         " <p>BSNL Team</p>"+
                                         " </div>" +
                                         " <p><h6> This email is system generated, please do not respond to this email.</h6></p> ";
-                            SmtpServer.Port = 587;
-                            SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
-                            SmtpServer.EnableSsl = true;
-                            SmtpServer.Send(mail);
-                            mail.To.Clear();
                         
                         break;
                     case 5:
@@ -129,17 +108,12 @@ namespace ReadExcelFileApp
                                         "<p> dated <b>" + LastPayDate + "</b></p>" +
                                         " <p>for an amount of <b>₹ " + ListBill + " </b></p>" +
                                         " <p>is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
-                                        " <p> amount at an early date, so as to avoid disconnection of your <b>[telephone / mobile / broadband]</b>.</p>" +
+                                        " <p> amount at an early date, so as to avoid disconnection of your <b>"+Gadgets+"</b>.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
                                         " <p><b> Regards,</b></p>" +
                                         " <p>BSNL Team</p>"+
                                         " </div>" +
                                         " <p><h6> This email is system generated, please do not respond to this email.</h6></p> ";
-                            SmtpServer.Port = 587;
-                            SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
-                            SmtpServer.EnableSsl = true;
-                            SmtpServer.Send(mail);
-                            mail.To.Clear();
                         
                         break;
                     case 6:
@@ -153,22 +127,21 @@ namespace ReadExcelFileApp
                                         "<p> dated <b> " + LastPayDate + " </b></p>" +
                                         " <p>for an amount of <b>₹ " + ListBill + " </b></p>" +
                                         " <p>is due for payment since < b >" + LastPayDate + " </ b >.Please pay up this outstanding </p>" +
-                                        " <p> amount immediately, so as to avoid disconnection of your <b>[telephone / mobile / broadband]</b>.</p>" +
+                                        " <p> amount immediately, so as to avoid disconnection of your <b>" + Gadgets + "</b>.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
                                         " <p><b> Regards,</b></p>" +
                                         " <p>BSNL Team</p>"+
                                         " </div>" +
                                         " <p><h6> This email is system generated, please do not respond to this email.</h6></p> ";
-                            SmtpServer.Port = 587;
-                            SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
-                            SmtpServer.EnableSsl = true;
-                            SmtpServer.Send(mail);
-                            mail.To.Clear();
                         
                         break;
                 }
-                
-                MessageBox.Show("mail Send");
+                SmtpServer.Port = 587;
+                SmtpServer.Credentials = new System.Net.NetworkCredential("vinay.pandey@gridinfocom.com", "9899938450@vinay");
+                SmtpServer.EnableSsl = true;
+                SmtpServer.Send(mail);
+                mail.To.Clear();
+                //MessageBox.Show("mail Send");
             }
             catch (Exception ex)
             {
