@@ -14,6 +14,7 @@ namespace ReadExcelFileApp
         {
             try
             {
+                int reminder = Convert.ToInt32(Reminder) + 1;                
                 MailMessage mail = new MailMessage();
                 mail.IsBodyHtml = true;
                 SmtpClient SmtpServer = new SmtpClient("smtp-mail.outlook.com");
@@ -34,8 +35,8 @@ namespace ReadExcelFileApp
                             mail.Body = " <div align='justify' style='font - family: Times New Roman; font - size: 15px; '>" +
                                         " <strong> Dear " + CustName + "</strong>,&nbsp;" +
                                         " <p> Your telephone dated <b> " + LastPayDate + " </b></p>" +
-                                        " <p>for an amount of <b>₹" + ListBill + " </b></p>" +
-                                        " <p>is due for payment since <b>" + LastPayDate + "</b>.Please pay up this outstanding </p>" +
+                                        " <p>for an amount of <b>₹" + ListBill + " </b>" +
+                                        " is due for payment since <b>" + LastPayDate + "</b>.Please pay up this outstanding </p>" +
                                         " <p> amount at an early date, to help us in providing you continued better service.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
                                         " <p><b> Regards,</b></p>" +
@@ -50,8 +51,8 @@ namespace ReadExcelFileApp
                             mail.Body = " <div align='justify' style='font - family: Times New Roman; font - size: 15px; '>" +
                                         " <strong> Dear " + CustName + "</strong>,&nbsp;" +
                                         " <p> Further to our earlier request, we bring to your attention that your telephone </p>" +
-                                        "<p> dated <b>  " + LastPayDate + "</b></p>" +
-                                        " <p>for an amount of <b>₹ " + ListBill + " </b></p>" +
+                                        "<p> dated <b>  " + LastPayDate + "</b>" +
+                                        " for an amount of <b>₹ " + ListBill + " </b></p>" +
                                         " <p>is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
                                         " <p> amount at an early date, to help us in providing you continued better service.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
@@ -68,8 +69,8 @@ namespace ReadExcelFileApp
                                         " <strong> Dear " + CustName + "</strong>,&nbsp;" +
                                         " <p> Further to our earlier request, we would again bring to your attention that your telephone </p>" +
                                         "<p> dated <b> " + LastPayDate + " </b></p>" +
-                                        " <p>for an amount of <b>₹" + ListBill+ " </b></p>" +
-                                        " <p>is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
+                                        " <p>for an amount of <b>₹" + ListBill+ " </b>" +
+                                        " is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
                                         " <p> amount at an early date, to help us in providing you continued better service.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
                                         " <p><b> Regards,</b></p>" +
@@ -84,11 +85,11 @@ namespace ReadExcelFileApp
 
                             mail.Body = " <div align='justify' style='font - family: Times New Roman; font - size: 15px; '>" +
                                         " <strong> Dear " + CustName + "</strong>,&nbsp;" +
-                                        " <p>This is our <b>" + Reminder + "th</b> request to pay your outstanding due</p>" +
+                                        " <p>This is our <b>" + reminder + "th</b> request to pay your outstanding due</p>" +
                                         " <p> Further to our earlier request, we would again bring to your attention that your telephone </p>" +
                                         "<p> dated <b> " + LastPayDate + " </b></p>" +
-                                        " <p>for an amount of <b>₹ " + ListBill + " </b></p>" +
-                                        " <p>is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
+                                        " <p>for an amount of <b>₹ " + ListBill + " </b>" +
+                                        " is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
                                         " <p> amount at an early date, to help us in providing you continued better service.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
                                         " <p><b> Regards,</b></p>" +
@@ -103,11 +104,11 @@ namespace ReadExcelFileApp
 
                             mail.Body = " <div align='justify' style='font - family: Times New Roman; font - size: 15px; '>" +
                                         " <strong> Dear " + CustName + "</strong>,&nbsp;" +
-                                        " <p>This is our <b>" + Reminder + "th</b> request to pay your outstanding due</p>" +
+                                        " <p>This is our <b>" + reminder + "th</b> request to pay your outstanding due</p>" +
                                         " <p> Further to our earlier request, we would again bring to your attention that your telephone </p>" +
                                         "<p> dated <b>" + LastPayDate + "</b></p>" +
-                                        " <p>for an amount of <b>₹ " + ListBill + " </b></p>" +
-                                        " <p>is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
+                                        " <p>for an amount of <b>₹ " + ListBill + " </b>" +
+                                        " is due for payment since <b>" + LastPayDate + " </b>.Please pay up this outstanding </p>" +
                                         " <p> amount at an early date, so as to avoid disconnection of your <b>"+Gadgets+"</b>.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +
                                         " <p><b> Regards,</b></p>" +
@@ -122,10 +123,9 @@ namespace ReadExcelFileApp
 
                             mail.Body = " <div align='justify' style='font - family: Times New Roman; font - size: 15px; '>" +
                                         " <strong> Dear " + CustName + "</strong>,&nbsp;" +
-                                        " <p>This is our <b>" + Reminder + "th</b> request to pay your outstanding due</p>" +
+                                        " <p>This is our <b>" + reminder + "th</b> request to pay your outstanding due</p>" +
                                         " <p> Further to our earlier request, we would again bring to your attention that your telephone</p>" +
-                                        "<p> dated <b> " + LastPayDate + " </b></p>" +
-                                        " <p>for an amount of <b>₹ " + ListBill + " </b></p>" +
+                                        "<p> dated <b> " + LastPayDate + " </b> for an amount of <b>₹ " + ListBill + " </b></p>" +
                                         " <p>is due for payment since < b >" + LastPayDate + " </ b >.Please pay up this outstanding </p>" +
                                         " <p> amount immediately, so as to avoid disconnection of your <b>" + Gadgets + "</b>.</p>" +
                                         " <p><strong> Thank you for your prompt action.</strong></p>" +

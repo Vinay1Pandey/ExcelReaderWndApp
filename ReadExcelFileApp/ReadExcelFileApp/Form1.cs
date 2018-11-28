@@ -62,10 +62,10 @@ namespace ReadExcelFileApp
             try
             {
                
-                Form1 frm1 = new Form1();
-                frm1.Visible = false;
-                Form2 frm = new Form2();
-                frm.Show();
+               
+            
+                label1.Show();
+               
                   
                         DataTable dtExcel1 = new DataTable();
                         DataTable dtExcel2 = new DataTable();
@@ -75,14 +75,24 @@ namespace ReadExcelFileApp
                         dtExcel2 = ReadExcel.ConvertExcelToDataTableRevenue(filePath);
                         dtExcel3 = ReadExcel.ConvertExcelToDataTableDisputes(filePath);
                         ProcessData.processData(dtExcel1, dtExcel2, dtExcel3, filePath);
-                        frm.Close();
-                frm1.Show();
+                label1.Hide();
+                
             }
             catch (Exception ex)
             {
 
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtFilePath_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
